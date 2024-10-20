@@ -1,0 +1,8 @@
+langchain
+langserve
+fastapi
+uvicorn
+openai
+pandas
+faiss-cpu
+python-dotenv

@@ -1,0 +1,243 @@
+# CSV-RAG-Usecase - Retrieval-Augmented Generation for CSV Data
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.95.1-blue.svg)
+![LangChain](https://img.shields.io/badge/LangChain-0.0.232-blue.svg)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-blue.svg)
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Configuration](#configuration)
+  - [Installing Dependencies](#installing-dependencies)
+- [Usage](#usage)
+  - [Starting the Server](#starting-the-server)
+  - [API Endpoints](#api-endpoints)
+  - [Request Examples](#request-examples)
+- [Contribution](#contribution)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
+- [Contact](#contact)
+
+## Introduction
+
+**CSV-RAG-Usecase** is a versatile Retrieval-Augmented Generation (RAG) system designed to provide question-and-answer capabilities based on any structured CSV dataset. Utilizing [LangChain](https://langchain.com/), [FastAPI](https://fastapi.tiangolo.com/), and [OpenAI GPT-4](https://openai.com/product/gpt-4), this project enables users to query their CSV data in natural language and receive accurate, contextually relevant responses.
+
+This specific implementation uses a dataset of French educational institutions, but the system can be adapted to any CSV data by modifying the data loading and processing steps.
+
+## Features
+
+- **Robust CSV Loading and Processing**: Handles various encodings and delimiters to ensure reliable ingestion of CSV files.
+- **OpenAI Embeddings**: Transforms textual data into vector embeddings using OpenAI's embedding models.
+- **FAISS Vector Store**: Efficiently indexes and retrieves relevant vectors for quick information retrieval.
+- **RAG Q&A Chain**: Integrates LangChain to combine document retrieval with contextual response generation.
+- **FastAPI REST API**: Provides a performant and user-friendly API interface for interacting with the system.
+- **Comprehensive Logging**: Detailed logging for monitoring, debugging, and maintaining the application.
+
+## Architecture
+
+![Architecture Diagram](docs/architecture_diagram.png)
+
+1. **Data Loading**: Reads the specified CSV file with encoding and delimiter handling.
+2. **Data Preparation**: Converts CSV data into text and metadata formats suitable for embedding generation.
+3. **Embedding Creation**: Utilizes `OpenAIEmbeddings` to generate vector representations of the textual data.
+4. **Vector Storage**: Stores and indexes embeddings using FAISS for efficient retrieval.
+5. **RAG Chain**: Configures `RetrievalQA` with a GPT-4 model to generate answers based on retrieved contexts.
+6. **API Exposure**: Provides RESTful endpoints via FastAPI for external interactions with the RAG system.
+
+## Installation
+
+### Prerequisites
+
+- **Python 3.9+**
+- **Git**
+- **OpenAI API Key**: Required for generating embeddings and utilizing the GPT-4 model.
+
+### Configuration
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone 
+   cd csv-rag-usecase
+   ```
+
+2. **Create a Virtual Environment**
+
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install Dependencies**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set Up Environment Variables**
+
+   Create a `.env` file in the root directory of the project and add your OpenAI API key:
+
+   ```env
+   OPENAI_API_KEY=your-openai-api-key
+   ```
+
+   **Note**: Ensure that the `.env` file is included in your `.gitignore` to prevent exposing sensitive information.
+
+### Installing Dependencies
+
+The `requirements.txt` file includes all necessary dependencies:
+
+```plaintext
+fastapi
+uvicorn
+pandas
+chardet
+python-dotenv
+langchain
+langchain-openai
+langchain-community
+langserve
+openai
+```
+
+Install them using:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+### Starting the Server
+
+Launch the FastAPI server with Uvicorn:
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+- **`main`**: The name of the main Python file without the `.py` extension.
+- **`app`**: The FastAPI application instance.
+
+The server will be accessible at [http://localhost:8000](http://localhost:8000).
+
+### API Endpoints
+
+#### 1. `/rag` - Question-Answer
+
+**Method**: `POST`
+
+**Description**: Submit a question and receive an answer based on the CSV data.
+
+**Request Payload**:
+
+```json
+{
+  "question": "What is the contact email of the primary school in Saint-Genis-Pouilly?",
+  "chat_history": []
+}
+```
+
+**Response**:
+
+```json
+{
+  "answer": "The contact email of the primary school in Saint-Genis-Pouilly is ce.0011432B@ac-lyon.fr."
+}
+```
+
+#### 2. `/rag-chain` - Advanced Q&A Chain
+
+**Method**: `POST`
+
+**Description**: Utilize the RAG chain with chat history for more contextual interactions.
+
+**Request Payload**:
+
+```json
+{
+  "question": "Which public primary schools are located in Grenoble?",
+  "chat_history": ["Which public primary schools are located in Grenoble?"]
+}
+```
+
+**Response**:
+
+```json
+{
+  "answer": "The public primary schools located in Grenoble include Ecole primaire, Ecole primaire LE VILLAGE, and Ecole primaire Chassiers."
+}
+```
+
+### Request Examples
+
+You can test the endpoints via [Swagger UI](http://localhost:8000/docs) provided by FastAPI or use `curl`:
+
+**Example with `curl`:**
+
+```bash
+curl -X POST "http://localhost:8000/rag" \
+     -H "Content-Type: application/json" \
+     -d '{"question": "What is the telephone number of Ecole maternelle Sospel?"}'
+```
+
+**Response:**
+
+```json
+{
+  "answer": "The telephone number of Ecole maternelle Sospel is 0493272587."
+}
+```
+
+## Contribution
+
+Contributions are welcome! To contribute:
+
+1. **Fork** the repository.
+2. **Create a feature branch** for your feature or bugfix:
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Commit your changes**:
+
+   ```bash
+   git commit -m "Add feature X"
+   ```
+
+4. **Push the branch**:
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+5. **Open a Pull Request** detailing your changes.
+
+### Best Practices
+
+- Follow the [PEP8](https://pep8.org/) style guide for Python code.
+- Add tests for any new features or bug fixes.
+- Update the README if your changes introduce new functionality.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Acknowledgements
+
+- **[LangChain](https://langchain.com/)** for their powerful framework facilitating language model integrations.
+- **[FastAPI](https://fastapi.tiangolo.com/)** for its fast and intuitive API framework.
+- **[OpenAI](https://openai.com/)** for providing advanced language models enabling intelligent interactions.
+- **Contributors** and the open-source community for their continuous support and contributions.
+
+---
+
+*This project is developed as part of a personal project to demonstrate the integration of modern technologies in creating question-and-answer systems based on structured data.*
